@@ -1,4 +1,13 @@
-<?php extract($boleto); ?>
+<?php 
+extract($boleto);
+
+$descontoNF = str_replace(',', '.', $desconto);
+$multaNF = str_replace(',', '.', $multa);
+$jurosNF = str_replace(',', '.', $juros);
+$valorNF = str_replace(',', '.', $valor);
+
+$valorCobrado = (float)$valorNF + ((float)$jurosNF + (float)$multaNF) - (float)$desconto;
+?>
 <table class="table-boleto" cellpadding="0" cellspacing="0" border="0">
     <tbody>
     <tr>
@@ -91,7 +100,7 @@
         </td>
         <td>
             <div class="titulo">(=) Valor do Documento</div>
-            <div class="conteudo rtl"><?= $valor; ?></div>
+            <div class="conteudo rtl"><?= 'R$ ' . $valor; ?></div>
         </td>
     </tr>
     <tr>
@@ -102,7 +111,7 @@
         </td>
         <td>
             <div class="titulo">(-) Descontos / Abatimentos</div>
-            <div class="conteudo rtl"></div>
+            <div class="conteudo rtl"><?= ((float)$descontoNF > 0 ? 'R$ ' . $desconto : '') ?></div>
         </td>
     </tr>
     <tr>
@@ -122,7 +131,7 @@
         </td>
         <td>
             <div class="titulo">(+) Mora / Multa</div>
-            <div class="conteudo rtl"></div>
+            <div class="conteudo rtl"><?= ((float)$multaNF > 0 ? 'R$ ' . number_format((float)$multaNF + (float)$jurosNF, 2, ',', '') : '') ?></div>
         </td>
     </tr>
     <tr>
@@ -142,7 +151,7 @@
         </td>
         <td>
             <div class="titulo">(=) Valor cobrado</div>
-            <div class="conteudo rtl"></div>
+            <div class="conteudo rtl"><?= 'R$ ' . number_format($valorCobrado, 2, ',', '') ?></div>
         </td>
     </tr>
     <tr>
