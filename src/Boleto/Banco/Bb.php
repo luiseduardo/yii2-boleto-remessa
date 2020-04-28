@@ -36,6 +36,13 @@ class Bb extends AbstractBoleto implements BoletoContract
      * @var array
      */
     protected $carteiras = array('11', '12', '15', '16', '17', '18', '31', '51');
+    
+    /**
+     * Define o nosso numero
+     * 
+     * @var string
+     */
+    private $nossoNumero;
 
     /**
      * Espécie do documento, coódigo para remessa
@@ -113,6 +120,16 @@ class Bb extends AbstractBoleto implements BoletoContract
     }
 
     /**
+     * Define o nosso número manualmente (problemas com convênios antigos)
+     *
+     * @return string
+     */
+    public function setNossoNumero($nossoNumero)
+    {
+        $this->nossoNumero = $nossoNumero;
+    }
+
+    /**
      * Gera o Nosso Número.
      *
      * @throws \Exception
@@ -120,6 +137,11 @@ class Bb extends AbstractBoleto implements BoletoContract
      */
     protected function gerarNossoNumero()
     {
+        // se já foi definido o nosso número, então só retorno (problemas com convênios antigos)
+        if ($this->nossoNumero) {
+            return $this->nossoNumero;
+        }
+        
         $convenio = $this->getConvenio();
         $numero_boleto = $this->getNumero();
         switch (strlen($convenio)) {
