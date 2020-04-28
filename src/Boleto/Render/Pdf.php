@@ -89,8 +89,23 @@ class Pdf extends AbstractPdf implements PdfContract
             $this->SetFont($this->PadraoFont, '', $this->fcel);
             $this->Cell(25, $this->cell, $this->_('Valor: '), 0, 0);
             $this->SetFont($this->PadraoFont, 'B', $this->fcel);
-            $this->Cell(0, $this->cell, $this->_(Util::nReal($this->boleto[$i]->getValor())), 0, 1);
+            $this->Cell(50, $this->cell, $this->_(Util::nReal($this->boleto[$i]->getValor())), 0);
             $this->SetFont($this->PadraoFont, '', $this->fcel);
+            
+            if ((float)($this->boleto[$i]->getMulta() + $this->boleto[$i]->getJuros()) > 0) {
+                $this->Cell(25, $this->cell, $this->_('Encargos: '), 0, 0);
+                $this->SetFont($this->PadraoFont, 'B', $this->fcel);
+                $this->Cell(50, $this->cell, $this->_(Util::nReal($this->boleto[$i]->getMulta() + $this->boleto[$i]->getJuros())), 0, 1);
+                $this->SetFont($this->PadraoFont, '', $this->fcel);
+            } elseif ((float)$this->boleto[$i]->getDesconto() > 0) {
+                $this->Cell(30, $this->cell, $this->_('Desconto vlr fixo até:'), 0, 0);
+                $this->SetFont($this->PadraoFont, 'B', $this->fcel);
+                $this->Cell(20, $this->cell, $this->_($this->boleto[$i]->getDataVencimento()->format('d/m/Y')), 0);
+                $this->Cell(30, $this->cell, $this->_(Util::nReal($this->boleto[$i]->getDesconto())), 0, 1);
+                $this->SetFont($this->PadraoFont, '', $this->fcel);
+            } else {
+                $this->Cell(25, $this->cell, $this->_(''), 0, 1);
+            }
         }
 
         if (!$this->showComprovante) {
@@ -259,10 +274,28 @@ class Pdf extends AbstractPdf implements PdfContract
         $this->Cell(50, $this->desc, $this->_('(=) Valor Cobrado'), 'TR', 1);
 
         $this->SetFont($this->PadraoFont, 'B', $this->fcel);
-        $this->Cell(30, $this->cell, $this->_(''), 'LR');
+        
+        if ((float)$this->boleto[$i]->getDesconto() > 0) {
+            $this->Cell(30, $this->cell, $this->_(Util::nReal($this->boleto[$i]->getDesconto())), 'LR', 0, 'R');
+        } else {
+            $this->Cell(30, $this->cell, $this->_(''), 'LR');
+        }
+
         $this->Cell(30, $this->cell, $this->_(''), 'R');
+
+        if ((float)($this->boleto[$i]->getMulta() + $this->boleto[$i]->getJuros())) {
+            $this->SetFont($this->PadraoFont, 'B', $this->fcel);
+            $this->Cell(30, $this->cell, $this->_(Util::nReal($this->boleto[$i]->getMulta() + $this->boleto[$i]->getJuros())), 'R', 0, 'R');
+            $this->SetFont($this->PadraoFont, '', $this->fcel);
+        } else {
+            $this->Cell(30, $this->cell, $this->_(''), 'R');
+        }
+
         $this->Cell(30, $this->cell, $this->_(''), 'R');
-        $this->Cell(30, $this->cell, $this->_(''), 'R');
+
+        $this->SetFont($this->PadraoFont, 'B', $this->fcel);
+        $this->Cell(50, $this->cell, $this->_(Util::nReal((float)$this->boleto[$i]->getValor() + ((float)$this->boleto[$i]->getMulta() + (float)$this->boleto[$i]->getJuros()) - (float)$this->boleto[$i]->getDesconto())), 'R', 0, 'R');
+        $this->SetFont($this->PadraoFont, '', $this->fcel);
         $this->Cell(50, $this->cell, $this->_(''), 'R', 1, 'R');
 
         $this->SetFont($this->PadraoFont, '', $this->fdes);
@@ -374,6 +407,13 @@ class Pdf extends AbstractPdf implements PdfContract
         $this->SetFont($this->PadraoFont, '', $this->fdes);
         $this->Cell(120, $this->desc, $this->_("Instruções de responsabilidade do beneficiário. Qualquer dúvida sobre este boleto, contate o beneficiário"), 'TLR');
         $this->Cell(50, $this->desc, $this->_('(-) Desconto / Abatimentos)'), 'TR', 1);
+        
+        if((float)$this->boleto[$i]->getDesconto() > 0) {
+            $this->Cell(120, $this->desc, $this->_(''), 'LR');
+            $this->SetFont($this->PadraoFont, 'B', $this->fcel);
+            $this->Cell(50, $this->cell, $this->_(Util::nReal($this->boleto[$i]->getDesconto())), 'R', 0, 'R');
+            $this->SetFont($this->PadraoFont, '', $this->fdes);
+        }
 
         $xInstrucoes = $this->GetX();
         $yInstrucoes = $this->GetY();
@@ -390,9 +430,16 @@ class Pdf extends AbstractPdf implements PdfContract
 
         $this->Cell(120, $this->desc, $this->_(''), 'LR');
         $this->Cell(50, $this->desc, $this->_('(+) Mora / Multa'), 'TR', 1);
-
+        
         $this->Cell(120, $this->cell, $this->_(''), 'LR');
-        $this->Cell(50, $this->cell, $this->_(''), 'R', 1);
+
+        if ((float)($this->boleto[$i]->getMulta() + $this->boleto[$i]->getJuros()) > 0) {
+            $this->SetFont($this->PadraoFont, 'B', $this->fcel);
+            $this->Cell(50, $this->cell, $this->_(Util::nReal($this->boleto[$i]->getMulta() + $this->boleto[$i]->getJuros())), 'R', 1, 'R');
+            $this->SetFont($this->PadraoFont, '', $this->fdes);
+        } else {
+            $this->Cell(50, $this->cell, $this->_(''), 'R', 1);
+        }
 
         $this->Cell(120, $this->desc, $this->_(''), 'LR');
         $this->Cell(50, $this->desc, $this->_('(+) Outros acréscimos'), 'TR', 1);
@@ -403,11 +450,12 @@ class Pdf extends AbstractPdf implements PdfContract
         $this->Cell(120, $this->desc, $this->_(''), 'LR');
         $this->Cell(50, $this->desc, $this->_('(=) Valor cobrado'), 'TR', 1);
 
-        $this->Cell(120, $this->cell, $this->_(''), 'BLR');
-        $this->Cell(50, $this->cell, $this->_(''), 'BR', 1);
+        $this->Cell(120, $this->cell, $this->_(''), 'LR');
+        $this->SetFont($this->PadraoFont, 'B', $this->fcel);
+        $this->Cell(50, $this->cell, $this->_(Util::nReal((float)$this->boleto[$i]->getValor() + ((float)$this->boleto[$i]->getMulta() + (float)$this->boleto[$i]->getJuros()) - (float)$this->boleto[$i]->getDesconto())), 'BRL', 1, 'R');
 
         $this->SetFont($this->PadraoFont, '', $this->fdes);
-        $this->Cell(0, $this->desc, $this->_('Pagador'), 'LR', 1);
+        $this->Cell(0, $this->desc, $this->_('Pagador'), 'TLR', 1);
 
         $this->SetFont($this->PadraoFont, 'B', $this->fcel);
         $this->Cell(0, $this->cell, $this->_($this->boleto[$i]->getPagador()->getNomeDocumento()), 'LR', 1);
