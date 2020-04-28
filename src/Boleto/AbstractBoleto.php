@@ -1262,10 +1262,10 @@ abstract class AbstractBoleto implements BoletoContract
      *
      * @throws \Exception
      */
-    final public function setNossoNumero()
-    {
-        throw new \Exception('Não é possível definir o nosso número diretamente. Utilize o método setNumero.');
-    }
+    //final public function setNossoNumero()
+    //{
+    //    throw new \Exception('Não é possível definir o nosso número diretamente. Utilize o método setNumero.');
+    //}
 
     /**
      * Retorna o Nosso Número calculado.
