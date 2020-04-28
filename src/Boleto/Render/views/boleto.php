@@ -1,7 +1,16 @@
 <?= $this->render('html/header', ['css' => $css]); ?>
 
 <?php foreach ($boletos as $i => $boleto): ?>
-    <?php extract($boleto); ?>
+    <?php 
+    extract($boleto);
+
+    $descontoNF = str_replace(',', '.', $desconto);
+    $multaNF = str_replace(',', '.', $multa);
+    $jurosNF = str_replace(',', '.', $juros);
+    $valorNF = str_replace(',', '.', $valor);
+
+    $valorCobrado = (float)$valorNF + ((float)$jurosNF + (float)$multaNF) - (float)$desconto;
+    ?>
     <?php if ($mostrar_instrucoes): ?>
         <div class="noprint info">
             <h2>Instruções de Impressão</h2>
@@ -21,10 +30,17 @@
                     internet banking:
                 </li>
             </ul>
-            <span class="header">Linha Digitável: <?= $linha_digitavel; ?></span>
-            <span class="header">Número: <?= $numero; ?></span>
-            <?= $valor ? '<span class="header">Valor: R$' . $valor . '</span>' : ''; ?>
-            <br>
+            <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td class="header">Linha Digitável: <?= $linha_digitavel; ?></td>
+                </tr>
+                <tr>
+                    <td class="header">Número: <?= $numero; ?></td>
+                </tr>
+                <tr>
+                    <td class="header"><?= $valor ? '<span class="header">Valor: R$ ' . $valor . '</span>' : ''; ?></td>
+                </tr>
+            </table>
         </div>
     <?php endif; ?>
 
@@ -114,11 +130,11 @@
             </td>
             <td>
                 <div class="titulo">(-) Descontos / Abatimentos</div>
-                <div class="conteudo rtl"></div>
+                <div class="conteudo rtl"><?= ((float)$descontoNF > 0 ? 'R$ ' . $desconto : '') ?></div>
             </td>
             <td>
                 <div class="titulo">(=) Valor Documento</div>
-                <div class="conteudo rtl"><?= $valor; ?></div>
+                <div class="conteudo rtl">R$ <?= $valor; ?></div>
             </td>
         </tr>
         <tr>
@@ -132,11 +148,11 @@
             </td>
             <td>
                 <div class="titulo">(+) Outros acréscimos</div>
-                <div class="conteudo rtl"></div>
+                <div class="conteudo rtl"><?= ((float)$multaNF > 0 ? 'R$ ' . number_format((float)$multaNF + (float)$jurosNF, 2, ',', '') : '') ?></div>
             </td>
             <td>
                 <div class="titulo">(=) Valor cobrado</div>
-                <div class="conteudo rtl"></div>
+                <div class="conteudo rtl">R$ <?= number_format($valorCobrado, 2, ',', '') ?></div>
             </td>
         </tr>
         <tr>
